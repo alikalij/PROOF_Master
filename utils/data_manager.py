@@ -12,10 +12,10 @@ class DataManager(object):
     def __init__(self, dataset_name, shuffle, seed, init_cls, increment):
 
         # load class to label name json file
-        with open('./utils/labels.json', 'r') as f:
+        with open('./PROOF_Master/utils/labels.json', 'r') as f:
             self._class_to_label = json.load(f)[dataset_name]
         print(self._class_to_label)
-        with open('./utils/templates.json', 'r') as f:
+        with open('./PROOF_Master/utils/templates.json', 'r') as f:
             self._data_to_prompt = json.load(f)[dataset_name]
         print(self._data_to_prompt)
         
