@@ -28,8 +28,13 @@ class iCIFAR10(iData):
     class_order = np.arange(10).tolist()
 
     def download_data(self):
-        train_dataset = datasets.cifar.CIFAR10("./data", train=True, download=True)
-        test_dataset = datasets.cifar.CIFAR10("./data", train=False, download=True)
+        data_path = "/content/drive/MyDrive/datasets/cifar100"
+        
+        # ساخت مسیر اگر وجود نداشت
+        os.makedirs(data_path, exist_ok=True)
+
+        train_dataset = datasets.cifar.CIFAR10(data_path, train=True, download=True)
+        test_dataset = datasets.cifar.CIFAR10(data_path, train=False, download=True)
         self.train_data, self.train_targets = train_dataset.data, np.array(
             train_dataset.targets
         )
