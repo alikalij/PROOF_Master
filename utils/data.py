@@ -56,7 +56,7 @@ class iCIFAR100(iData):
     class_order = np.arange(100).tolist()
 
     def download_data(self):
-        data_path = "/content/drive/MyDrive/datasets/cifar100"
+        data_path = "/content/drive/MyDrive/datasets/PROOF/cifar100"
         
         # ساخت مسیر اگر وجود نداشت
         os.makedirs(data_path, exist_ok=True)
