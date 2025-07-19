@@ -21,8 +21,9 @@ def train(args):
 def _train(args):
 
     init_cls = 0 if args ["init_cls"] == args["increment"] else args["init_cls"]
-    logs_name = "logs/{}/{}/{}/{}".format(args["model_name"],args["dataset"], init_cls, args['increment'])
-    
+    #logs_name = "logs/{}/{}/{}/{}".format(args["model_name"],args["dataset"], init_cls, args['increment'])
+    logs_name = "/content/drive/MyDrive/saved_models/proof/{}/{}/{}/{}".format(args["model_name"], args["dataset"], init_cls, args['increment'])
+
     if not os.path.exists(logs_name):
         os.makedirs(logs_name)
 
@@ -42,10 +43,29 @@ def _train(args):
     model = factory.get_model(args["model_name"], args)
     model.save_dir=logs_name
 
+    #==============================================
+    # مثال: اگر می‌خواهی از آخرین task ذخیره شده ادامه بدهی
+    last_task = None
+    for task_id in range(data_manager.nb_tasks):
+        ckpt_path = os.path.join(logs_name, f"model_task_{task_id}.pth")
+        if os.path.exists(ckpt_path):
+            last_task = task_id
+        else:
+            break
+
+    if last_task is not None:
+        load_path = os.path.join(logs_name, f"model_task_{last_task}.pth")
+        model._network.load_state_dict(torch.load(load_path))
+        logging.info(f"Loaded model from {load_path}")
+        start_task = last_task + 1
+    else:
+        start_task = 0
+    #==============================================
+
     cnn_curve, nme_curve = {"top1": [], "top5": []}, {"top1": [], "top5": []}
     zs_seen_curve, zs_unseen_curve, zs_harmonic_curve, zs_total_curve = {"top1": [], "top5": []}, {"top1": [], "top5": []}, {"top1": [], "top5": []}, {"top1": [], "top5": []}
 
-    for task in range(data_manager.nb_tasks):
+    for task in range(start_task, data_manager.nb_tasks):
         logging.info("All params: {}".format(count_parameters(model._network)))
         logging.info(
             "Trainable params: {}".format(count_parameters(model._network, True))
@@ -54,8 +74,13 @@ def _train(args):
         # cnn_accy, nme_accy = model.eval_task()
         cnn_accy, nme_accy, zs_seen, zs_unseen, zs_harmonic, zs_total = model.eval_task()
         model.after_task()
+        
+        #==============================================
+        save_path = os.path.join(logs_name, f"model_task_{task}.pth")
+        torch.save(model._network.state_dict(), save_path)
+        logging.info(f"Model saved to {save_path}")
+        #==============================================
 
-       
         logging.info("CNN: {}".format(cnn_accy["grouped"]))
 
         cnn_curve["top1"].append(cnn_accy["top1"])
